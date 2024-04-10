@@ -1,6 +1,6 @@
 // 設定情報を格納するオブジェクト
 const config = {
-    appTitle: "Build Your Own PC",
+    appTitle: "Build Your Own Computer",
     url: "https://api.recursionist.io/builder/computers?type=",
 };
 
@@ -253,26 +253,25 @@ class View {
     // 初期画面表示
     static getInitialPageHTMLString() {
         // ナビゲーションバーの作成
-        const navDiv = this.createDivWithClass("container-fluid");
-        navDiv.innerHTML = `
-            <nav class="navbar navbar-dark bg-secondary">
-                <div class="container-fluid d-flex justify-content-center">
-                    <span class="navbar-brand fs-1">${config.appTitle}</span>
-                </div>
-            </nav>`;
+        const headerDiv = this.createDivWithClass("");
+        headerDiv.innerHTML = `
+            <div class="d-flex justify-content-center align-items-center col-12 bg-dark">
+                <h1 class="text-white text-center">${config.appTitle}</h1>
+            </div>
+        `;
 
         // メインコンテンツの作成
-        const mainDiv = this.createDivWithClass("main container-fluid my-2");
+        const mainDiv = this.createDivWithClass("main my-2");
         mainDiv.innerHTML = `
             ${this.createStep("1", "CPU")}
             ${this.createStep("2", "GPU")}
             ${this.createStep("3", "memory card")}
             ${this.createStep("4", "storage")}
-            <div class="mt-2">
-                <button type="button" id="add-btn" class="btn btn-lg">ADD PC</button>
+            <div class="m-2">
+                <button type="button" id="add-btn" class="btn btn-primary">ADD PC</button>
             </div>`;
 
-        target.append(navDiv, mainDiv);
+        target.append(headerDiv, mainDiv);
         // イベントリスナーの追加
         document.getElementById("add-btn").addEventListener("click", () => Controller.finalizePCBuild());
     }
@@ -283,18 +282,16 @@ class View {
         const idPrefix = componentType === "memory card" ? "ram" : componentType.toLowerCase();        
         
         return `
-            <div class="step${stepNumber} container p-2">
-                <h3>Step${stepNumber}: Select your ${componentType}</h3>
-                <div class="d-flex gap-3">
+            <div class="step${stepNumber} p-2">
+                <h3>step${stepNumber}: Select your ${componentType}</h3>
+                <div class="d-sm-flex">
                     ${idPrefix === "ram" ? this.getNumberRamSelectHTML() : ""}
                     ${idPrefix === "storage" ? this.getStorageSelectHTML() : ""}
-                    <div class="input-group my-3">
-                        <label for="${idPrefix}-brand" class="col-form-label me-2">Brand</label>
-                        <select class="form-select ms-2" id="${idPrefix}-brand"></select>
-                    </div>
-                    <div class="input-group my-3">
-                        <label for="${idPrefix}-model" class="col-form-label me-2">Model</label>
-                        <select class="form-select ms-2" id="${idPrefix}-model"></select>
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center w-100 p-0">
+                        <h5>Brand</h5>
+                        <select class="custom-select mx-3 col-9 col-sm-3" id="${idPrefix}-brand"></select>
+                        <h5>Model</h5>
+                        <select class="custom-select mx-3 col-9 col-sm-3" id="${idPrefix}-model"></select>
                     </div>
                 </div>
             </div>`;
@@ -302,26 +299,24 @@ class View {
     
     // ramの時はhow manyの選択を追加
     static getNumberRamSelectHTML() {
-        return `<div class="input-group my-3">
-        <label for="ram-num" class="col-form-label me-2">How Many?</label>
-        <select class="form-select ms-2" id="ram-num"></select>
+        return `<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-sm-between col-sm-3 p-0 mr-3">
+        <h5 class="col-sm-6 p-0 m-0">How many?</h5>
+        <select class="custom-select mx-3 col-9 col-sm-4" id="ram-num"></select>
         </div>`; // RAMの選択用HTML
     }
     
     // storageの時はhdd ssdの選択を追加
     static getStorageSelectHTML() {
-        return `<div class="input-group my-3">
-        <label for="storage-type" class="col-form-label me-2">HDD or SSD</label>
-        <select class="form-select ms-2" id="storage-type">
+        return `<div class="d-flex flex-column flex-sm-row align-items-sm-center col-sm-6 p-0 mr-2">
+                    <h5 class="col-sm-1 p-0 mr-2">HDD or SSD</h5>
+                    <select class="custom-select mx-3 col-9 col-sm-4" id="storage-type">
                         <option>-</option>
                         <option value="hdd">HDD</option>
                         <option value="ssd">SSD</option>
                     </select>
-            </div>
-            <div class="input-group my-3">
-                <label for="storage-capacity" class="col-form-label me-2">Storage</label>
-                <select class="form-select ms-2" id="storage-capacity"></select>
-            </div>`; // ストレージ選択用HTML
+                    <h5>Storage</h5>
+                    <select class="custom-select ml-3 col-9 col-sm-4" id="storage-capacity"></select>
+                </div>`; // ストレージ選択用HTML
     }
 
 
@@ -349,27 +344,33 @@ class View {
     static displayPCSpecs(pc) {
         const resultDiv = this.createDivWithClass("result card mt-5");
         resultDiv.innerHTML = `
-            <div class="card-body d-flex justify-content-between">
-                <div class="d-flex align-items-center m-5">
-                    <p class="card-title">PC Specs</p>
+            <div class="bg-primary text-white p-3">
+                <div class="d-flex justify-content-center mb-3">
+                    <h1 class="card-title">PC Specs</h1>
                 </div>
                 <div>
-                    <h3>GPU</h3>
-                    <p>${pc.gpu.brand} ${pc.gpu.model}</p>
-                    <h3>RAM</h3>
-                    <p>${pc.ram.brand} ${pc.ram.model}</p>
-                    <h3>STORAGE</h3>
-                    <p>${pc.storage.type} ${pc.storage.brand} ${pc.storage.model}</p>
+                    <h2>CPU</h2>
+                    <h5>Brand: ${pc.cpu.brand}</h5>
+                    <h5>Model: ${pc.cpu.model}</h5>
+                    <h2>GPU</h2>
+                    <h5>Brand: ${pc.gpu.brand}</h5>
+                    <h5>Model: ${pc.gpu.model}</h5>
+                    <h2>RAM</h2>
+                    <h5>Brand: ${pc.ram.brand}</h5>
+                    <h5>Model: ${pc.ram.model}</h5>
+                    <h2>STORAGE</h2>
+                    <h5>Disk: ${pc.storage.type}</h5>
+                    <h5>Storage: ${pc.storage.model.match(/\d+(?:GB|TB)/i)}</h5>
+                    <h5>Brand: ${pc.storage.brand}</h5>
+                    <h5>Model: ${pc.storage.model}</h5>
                 </div>
-                <div class="d-flex align-items-end">
-                    <p id="gaming" class="card-text m-0 pe-4">Gaming ${pc.getGamingBenchmark()} %</p>
-                    <p id="work" class="card-text">Work ${pc.getWorkBenchmark()} %</p>
+                <div class="d-flex justify-content-around mt-3">
+                    <h1 id="gaming" class="card-text m-0 pe-4">Gaming ${pc.getGamingBenchmark()} %</h5>
+                    <h1 id="work" class="card-text">Work ${pc.getWorkBenchmark()} %</h5>
                 </div>
             </div>`;
         target.append(resultDiv);
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    Controller.startComputerBuild();
-});
+Controller.startComputerBuild();
