@@ -2,6 +2,7 @@
 const config = {
     appTitle: "Build Your Own Computer",
     url: "https://api.recursionist.io/builder/computers?type=",
+    componentTypes : ["cpu", "gpu", "ram", "storage"]
 };
 
 // ハードウェアコンポーネントのクラス（共通属性をもつ基底クラス）
@@ -66,7 +67,6 @@ class PC {
 
 class Controller {
     // 部品名文字列[]
-    static componentTypes = ["cpu", "gpu", "ram", "storage"];
     // コンポーネントのタイプ文字列からクラスコンストラクタへのマッピング
     static componentClassMap = {
         cpu: CPU,
@@ -114,7 +114,7 @@ class Controller {
     static async fetchAndDisplayAllData() {
         // mapとPromise.allを使用して非同期にデータをフェッチ
         try {
-            const fetchPromises = this.componentTypes.map(type => this.fetchAndDisplayComponentData(type));
+            const fetchPromises = config.componentTypes.map(type => this.fetchAndDisplayComponentData(type));
             await Promise.all(fetchPromises);
         } catch (error) {
             console.error("Error fetching component data: ", error);
@@ -133,6 +133,9 @@ class Controller {
             }
             // urlへアクセスしデータのfetch
             const response = await fetch(`${config.url}${componentType}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             this.fetchedData[componentType] = data; // フェッチしたデータを保存
 
@@ -183,7 +186,11 @@ class Controller {
             if (!storageType) return;
             
             try {
-                const storageData = await fetch(`${config.url}${storageType}`).then(res => res.json());
+                const response = await fetch(`${config.url}${storageType}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const storageData = await response.json();
                 this.fetchedData["storage"] = storageData; // フェッチしたデータを保存
 
                 View.setOption("storage", "capacity", new Set(storageData.map((item) => this.getCapacity(item))));
@@ -342,7 +349,7 @@ class View {
 
     // 結果画面表示
     static displayPCSpecs(pc) {
-        const resultDiv = this.createDivWithClass("result card mt-5");
+        const resultDiv = this.createDivWithClass("result mt-5");
         resultDiv.innerHTML = `
             <div class="bg-primary text-white p-3">
                 <div class="d-flex justify-content-center mb-3">
